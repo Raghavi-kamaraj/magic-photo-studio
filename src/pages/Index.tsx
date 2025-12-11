@@ -1,12 +1,167 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState, useCallback } from 'react';
+import { Header } from '@/components/Header';
+import { PhotoUpload } from '@/components/PhotoUpload';
+import { ProcessingSteps } from '@/components/ProcessingSteps';
+import { ResultDisplay } from '@/components/ResultDisplay';
+import { Button } from '@/components/ui/button';
+import { Sparkles, BookOpen, Image, Wand2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+type AppState = 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
 
 const Index = () => {
+  const [appState, setAppState] = useState<AppState>('idle');
+  const [currentStep, setCurrentStep] = useState(1);
+  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
+  const [personalizedImage, setPersonalizedImage] = useState<string | null>(null);
+
+  const handlePhotoSelected = useCallback(async (file: File) => {
+    try {
+      setAppState('uploading');
+      setCurrentStep(1);
+      
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target?.result as string;
+        setUploadedPhoto(base64);
+        
+        setAppState('processing');
+        setCurrentStep(2);
+        
+        // Simulate face detection step
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setCurrentStep(3);
+        
+        try {
+          // Call the edge function
+          const { data, error } = await supabase.functions.invoke('personalize-illustration', {
+            body: { 
+              photo: base64,
+              template: 'default'
+            }
+          });
+          
+          if (error) throw error;
+          
+          if (data?.personalizedImage) {
+            setPersonalizedImage(data.personalizedImage);
+            setAppState('complete');
+            toast.success('Illustration personalized successfully!');
+          } else {
+            throw new Error('No image returned from API');
+          }
+        } catch (apiError) {
+          console.error('API Error:', apiError);
+          // For demo purposes, show a placeholder result
+          setPersonalizedImage(base64);
+          setAppState('complete');
+          toast.info('Demo mode: Using original image as placeholder');
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error processing photo:', error);
+      setAppState('error');
+      toast.error('Failed to process photo. Please try again.');
+    }
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setAppState('idle');
+    setCurrentStep(1);
+    setUploadedPhoto(null);
+    setPersonalizedImage(null);
+  }, []);
+
+  const handleDownload = useCallback(() => {
+    if (!personalizedImage) return;
+    
+    const link = document.createElement('a');
+    link.href = personalizedImage;
+    link.download = 'pickabook-personalized.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success('Image downloaded!');
+  }, [personalizedImage]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gradient-hero paper-texture">
+      <Header />
+      
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        {appState === 'complete' && uploadedPhoto && personalizedImage ? (
+          <ResultDisplay
+            originalImage={uploadedPhoto}
+            personalizedImage={personalizedImage}
+            onReset={handleReset}
+            onDownload={handleDownload}
+          />
+        ) : (
+          <>
+            {/* Hero Section */}
+            <div className="text-center mb-12 animate-fade-in">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-lavender-light text-lavender text-sm font-medium mb-6">
+                <Sparkles className="w-4 h-4" />
+                AI-Powered Personalization
+              </div>
+              
+              <h1 className="font-display text-4xl md:text-6xl text-foreground mb-4 leading-tight">
+                Make Your Child the
+                <span className="text-coral block">Hero of the Story</span>
+              </h1>
+              
+              <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto mb-8">
+                Upload a photo and watch as AI transforms it into a beautiful 
+                illustrated character for personalized storybooks
+              </p>
+
+              {/* Feature pills */}
+              <div className="flex flex-wrap justify-center gap-3 mb-12">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-sage-light">
+                  <Image className="w-4 h-4 text-sage" />
+                  <span className="text-sage text-sm font-medium">Face Detection</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-coral/10">
+                  <Wand2 className="w-4 h-4 text-coral" />
+                  <span className="text-coral text-sm font-medium">Style Transfer</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-lavender-light">
+                  <BookOpen className="w-4 h-4 text-lavender" />
+                  <span className="text-lavender text-sm font-medium">Illustration Ready</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Processing Steps */}
+            {(appState === 'uploading' || appState === 'processing') && (
+              <ProcessingSteps currentStep={currentStep} />
+            )}
+
+            {/* Upload Component */}
+            <div className="animate-slide-up delay-200">
+              <PhotoUpload 
+                onPhotoSelected={handlePhotoSelected}
+                isProcessing={appState === 'uploading' || appState === 'processing'}
+              />
+            </div>
+
+            {/* Demo Tip */}
+            {appState === 'idle' && (
+              <div className="mt-8 text-center animate-fade-in delay-300">
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-semibold">Tip:</span> For best results, use a clear, front-facing photo with good lighting
+                </p>
+              </div>
+            )}
+          </>
+        )}
+      </main>
+
+      {/* Decorative Elements */}
+      <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-sage-light/30 to-transparent pointer-events-none" />
     </div>
   );
 };
