@@ -5,6 +5,7 @@ import { ProcessingSteps } from '@/components/ProcessingSteps';
 import { ResultDisplay } from '@/components/ResultDisplay';
 import { Sparkles, BookOpen, Image, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 type AppState = 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
 
@@ -28,17 +29,35 @@ const Index = () => {
         setAppState('processing');
         setCurrentStep(2);
         
-        // Simulate face detection step
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Face detection step
+        await new Promise(resolve => setTimeout(resolve, 1000));
         setCurrentStep(3);
         
-        // Simulate AI processing step
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Demo mode: show original image as placeholder
-        setPersonalizedImage(base64);
-        setAppState('complete');
-        toast.info('Demo mode: Backend not connected yet');
+        try {
+          // Call the edge function for AI transformation
+          const { data, error } = await supabase.functions.invoke('personalize-illustration', {
+            body: { photo: base64 }
+          });
+          
+          if (error) {
+            console.error('Function error:', error);
+            throw new Error(error.message || 'Failed to process image');
+          }
+          
+          if (data?.personalizedImage) {
+            setPersonalizedImage(data.personalizedImage);
+            setAppState('complete');
+            toast.success('Photo transformed into illustration!');
+          } else if (data?.error) {
+            throw new Error(data.error);
+          } else {
+            throw new Error('No image returned from AI');
+          }
+        } catch (apiError: any) {
+          console.error('API Error:', apiError);
+          setAppState('error');
+          toast.error(apiError.message || 'Failed to transform image');
+        }
       };
       reader.readAsDataURL(file);
     } catch (error) {

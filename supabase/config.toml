@@ -1,0 +1,4 @@
+project_id = "koqwnxwypeolvovcshab"
+
+[functions.personalize-illustration]
+verify_jwt = false
