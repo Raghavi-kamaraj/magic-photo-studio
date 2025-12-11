@@ -3,10 +3,8 @@ import { Header } from '@/components/Header';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { ProcessingSteps } from '@/components/ProcessingSteps';
 import { ResultDisplay } from '@/components/ResultDisplay';
-import { Button } from '@/components/ui/button';
 import { Sparkles, BookOpen, Image, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
 type AppState = 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
 
@@ -34,31 +32,13 @@ const Index = () => {
         await new Promise(resolve => setTimeout(resolve, 1500));
         setCurrentStep(3);
         
-        try {
-          // Call the edge function
-          const { data, error } = await supabase.functions.invoke('personalize-illustration', {
-            body: { 
-              photo: base64,
-              template: 'default'
-            }
-          });
-          
-          if (error) throw error;
-          
-          if (data?.personalizedImage) {
-            setPersonalizedImage(data.personalizedImage);
-            setAppState('complete');
-            toast.success('Illustration personalized successfully!');
-          } else {
-            throw new Error('No image returned from API');
-          }
-        } catch (apiError) {
-          console.error('API Error:', apiError);
-          // For demo purposes, show a placeholder result
-          setPersonalizedImage(base64);
-          setAppState('complete');
-          toast.info('Demo mode: Using original image as placeholder');
-        }
+        // Simulate AI processing step
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Demo mode: show original image as placeholder
+        setPersonalizedImage(base64);
+        setAppState('complete');
+        toast.info('Demo mode: Backend not connected yet');
       };
       reader.readAsDataURL(file);
     } catch (error) {
