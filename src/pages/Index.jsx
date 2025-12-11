@@ -7,15 +7,13 @@ import { Sparkles, BookOpen, Image, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
-type AppState = 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
-
 const Index = () => {
-  const [appState, setAppState] = useState<AppState>('idle');
+  const [appState, setAppState] = useState('idle');
   const [currentStep, setCurrentStep] = useState(1);
-  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
-  const [personalizedImage, setPersonalizedImage] = useState<string | null>(null);
+  const [uploadedPhoto, setUploadedPhoto] = useState(null);
+  const [personalizedImage, setPersonalizedImage] = useState(null);
 
-  const handlePhotoSelected = useCallback(async (file: File) => {
+  const handlePhotoSelected = useCallback(async (file) => {
     try {
       setAppState('uploading');
       setCurrentStep(1);
@@ -23,7 +21,7 @@ const Index = () => {
       // Convert file to base64
       const reader = new FileReader();
       reader.onload = async (e) => {
-        const base64 = e.target?.result as string;
+        const base64 = e.target?.result;
         setUploadedPhoto(base64);
         
         setAppState('processing');
@@ -53,7 +51,7 @@ const Index = () => {
           } else {
             throw new Error('No image returned from AI');
           }
-        } catch (apiError: any) {
+        } catch (apiError) {
           console.error('API Error:', apiError);
           setAppState('error');
           toast.error(apiError.message || 'Failed to transform image');
