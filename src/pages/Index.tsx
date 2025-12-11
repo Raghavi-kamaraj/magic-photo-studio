@@ -7,13 +7,15 @@ import { Sparkles, BookOpen, Image, Wand2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
-const Index = () => {
-  const [appState, setAppState] = useState('idle');
-  const [currentStep, setCurrentStep] = useState(1);
-  const [uploadedPhoto, setUploadedPhoto] = useState(null);
-  const [personalizedImage, setPersonalizedImage] = useState(null);
+type AppState = 'idle' | 'uploading' | 'processing' | 'complete' | 'error';
 
-  const handlePhotoSelected = useCallback(async (file) => {
+const Index = () => {
+  const [appState, setAppState] = useState<AppState>('idle');
+  const [currentStep, setCurrentStep] = useState(1);
+  const [uploadedPhoto, setUploadedPhoto] = useState<string | null>(null);
+  const [personalizedImage, setPersonalizedImage] = useState<string | null>(null);
+
+  const handlePhotoSelected = useCallback(async (file: File) => {
     try {
       setAppState('uploading');
       setCurrentStep(1);
@@ -21,7 +23,7 @@ const Index = () => {
       // Convert file to base64
       const reader = new FileReader();
       reader.onload = async (e) => {
-        const base64 = e.target?.result;
+        const base64 = e.target?.result as string;
         setUploadedPhoto(base64);
         
         setAppState('processing');
@@ -51,7 +53,7 @@ const Index = () => {
           } else {
             throw new Error('No image returned from AI');
           }
-        } catch (apiError) {
+        } catch (apiError: any) {
           console.error('API Error:', apiError);
           setAppState('error');
           toast.error(apiError.message || 'Failed to transform image');
