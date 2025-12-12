@@ -64,97 +64,17 @@ Applies style transfer to match a chosen illustration theme.
 
 
 
+Website URL: https://pickabookart.netlify.app/
 
-2. Model Choice
-InstantID via Replicate
+This application is a React-based web app deployed on Netlify, with backend processing handled via Supabase Edge Functions.
+On the home page, I have included an “Architecture” menu option, which navigates to a dedicated Architecture page. This page visually explains the overall structure of the application, including:
 
-InstantID is chosen for its ability to preserve facial identity while applying artistic styles.
-It combines the best of face-swap and style transfer technologies.
+Frontend Architecture (React components, routing, UI flow)
 
-✔ Pros
+Backend Architecture (Supabase Edge Function for image transformation)
 
-High identity preservation
+Workflow Pipeline (Photo upload → Face detection → Illustration generation → Output image)
 
-Good style control via ControlNet
+API Integration Flow (How the frontend communicates with the Supabase function)
 
-Single-image inference (no training)
-
-Supports various illustration styles
-
-Replicate provides easy API access
-
-Alternatives Considered
-
-PhotoMaker: Good but less style control
-
-IP-Adapter: Requires more tuning
-
-LoRA fine-tuning: Too slow for real-time
-
-Pure ControlNet: Less identity preservation
-
-Generates the final AI-rendered output image.
-
-3. Known Limitations
-Processing Time
-
-Each personalization takes 10–30 seconds depending on model load.
-
-Face Angle Sensitivity
-
-Best results with front-facing photos; extreme angles reduce quality.
-
-Style Consistency
-
-Maintaining exact illustration style across different faces requires fine-tuning.
-
-API Costs
-
-Replicate charges per inference; high volume would need cost optimization.
-
-Single Template
-
-Current prototype uses one template; production would need template management.
-
-4. V2 Improvements
-Multiple Templates
-
-Support various illustration styles and scenes.
-
-Queue System
-
-Background job processing with webhooks for better UX.
-
-Face Pre-processing
-
-Auto-crop, enhance, and validate face quality before processing.
-
-Style Fine-tuning
-
-Train custom LoRAs for exact style matching.
-
-Batch Processing
-
-Generate multiple pages/scenes in one request.
-
-Caching Layer
-
-Cache face embeddings for faster re-processing.
-
-5. Tech Stack
-
-* React — Frontend
-
-* JavaScript — Language
-
-* Tailwind CSS — Styling
-
-* Vite — Build Tool
-
-* Supabase — Backend
-
-* Edge Functions — API
-
-* Replicate — AI/ML
-
-* InstantID — Model
+This page is designed to help reviewers and managers quickly understand how the application works internally, along with the component hierarchy and request flow.
