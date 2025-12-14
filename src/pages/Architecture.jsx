@@ -28,37 +28,38 @@ export const ArchitecturePage = () => {
             System Architecture
           </h2>
           <div className="bg-card rounded-3xl p-6 shadow-card">
-            <div className="bg-parchment rounded-2xl p-8 font-mono text-sm">
-              <pre className="whitespace-pre-wrap text-foreground/80">
-{`┌─────────────────────────────────────────────────────────────────┐
-│                        FRONTEND (React)                          │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐  │
-│  │ PhotoUpload │  │  Processing │  │    ResultDisplay        │  │
-│  │  Component  │──│    Steps    │──│      Component          │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────────┘  │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   EDGE FUNCTION (Deno)                          │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │                 /personalize-illustration                │   │
-│  │  • Receives base64 photo                                 │   │
-│  │  • Calls Replicate API (InstantID / ControlNet)         │   │
-│  │  • Returns personalized illustration                     │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    REPLICATE API                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │  Model: InstantID (or similar face-swap model)          │   │
-│  │  • Face detection & extraction                           │   │
-│  │  • Style transfer to illustration style                  │   │
-│  │  • Composite into template                               │   │
-│  └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘`}
+            <div className="bg-parchment rounded-2xl p-4 md:p-8 font-mono text-xs md:text-sm overflow-x-auto">
+              <pre className="whitespace-pre text-foreground/80 min-w-0">
+{`┌────────────────────────────┐
+│   FRONTEND (React)         │
+│  ┌──────────────────────┐  │
+│  │ PhotoUpload Component│  │
+│  └──────────┬───────────┘  │
+│             ▼              │
+│  ┌──────────────────────┐  │
+│  │ Processing Steps     │  │
+│  └──────────┬───────────┘  │
+│             ▼              │
+│  ┌──────────────────────┐  │
+│  │ ResultDisplay        │  │
+│  └──────────────────────┘  │
+└─────────────┬──────────────┘
+              ▼
+┌────────────────────────────┐
+│ EDGE FUNCTION (Deno)       │
+│ /personalize-illustration  │
+│ • Receives base64 photo    │
+│ • Calls Lovable AI API     │
+│ • Returns illustration     │
+└─────────────┬──────────────┘
+              ▼
+┌────────────────────────────┐
+│ LOVABLE AI                 │
+│ Model: Gemini Image Gen    │
+│ • Photo to anime style     │
+│ • Identity preservation    │
+│ • Storybook illustration   │
+└────────────────────────────┘`}
               </pre>
             </div>
           </div>

@@ -21,9 +21,9 @@ serve(async (req) => {
       );
     }
 
-    const lovable_API_KEY = Deno.env.get('lovable_API_KEY');
-    if (!lovable_API_KEY) {
-      throw new Error('lovable_API_KEY is not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
     console.log('Starting image transformation...');
@@ -31,7 +31,7 @@ serve(async (req) => {
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovable_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
